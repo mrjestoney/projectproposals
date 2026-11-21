@@ -1,26 +1,398 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens. Light values come from the owner's jestoneacademy app; dark values are derived from the same hues
+ * (see docs/DESIGN-NOTES.md). Theme: follows the system, unless <html data-theme="light|dark"> is set by the toggle.
+ * Components use the token names (bg-panel, text-ink, ...), never raw hex values.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --panel: #f0f0ea;
+  --field: #fbfbf7;
+  --line: #d9d9cf;
+  --line-hover: #b9b9ad;
+  --ink: #1a1a1c;
+  --ink-soft: #55555b;
+  --hint: #6b6b72;
+  --brand: #14684b;
+  --brand-ink: #ffffff;
+  --primary: #14684b;
+  --primary-strong: #0f5a40;
+  --logo-deep: #0c4533;
+  --danger: #c0361a;
+  --success: #14684b;
+  --warning: #8a5a00;
+  --highlight: #fff1a8;
+  --code-bg: #e8e8e0;
+
+  --accent-build-replay: #0e6a72;
+  --accent-poster-unlocker: #8a3a8f;
+  --accent-daftari: #a35a00;
+  --accent-xerote: #3a4fb5;
+  --accent-hardware-lab: #b23a48;
+
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root[data-theme="dark"] {
+  --panel: #121513;
+  --field: #1b201d;
+  --line: #2e342f;
+  --line-hover: #444c46;
+  --ink: #ecece6;
+  --ink-soft: #b4b5ad;
+  --hint: #9a9b93;
+  --brand: #4fb98d;
+  --brand-ink: #0b0d0c;
+  --primary: #14684b;
+  --primary-strong: #1a7d5b;
+  --danger: #ff8a70;
+  --success: #4fb98d;
+  --warning: #f0b05c;
+  --highlight: #5a4a00;
+  --code-bg: #0d100e;
+
+  --accent-build-replay: #5cc7cf;
+  --accent-poster-unlocker: #d99ade;
+  --accent-daftari: #f0b05c;
+  --accent-xerote: #9fb0ff;
+  --accent-hardware-lab: #f2929c;
+
+  color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --panel: #121513;
+    --field: #1b201d;
+    --line: #2e342f;
+    --line-hover: #444c46;
+    --ink: #ecece6;
+    --ink-soft: #b4b5ad;
+    --hint: #9a9b93;
+    --brand: #4fb98d;
+    --brand-ink: #0b0d0c;
+    --primary: #14684b;
+    --primary-strong: #1a7d5b;
+    --danger: #ff8a70;
+    --success: #4fb98d;
+    --warning: #f0b05c;
+    --highlight: #5a4a00;
+    --code-bg: #0d100e;
+
+    --accent-build-replay: #5cc7cf;
+    --accent-poster-unlocker: #d99ade;
+    --accent-daftari: #f0b05c;
+    --accent-xerote: #9fb0ff;
+    --accent-hardware-lab: #f2929c;
+
+    color-scheme: dark;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Derived tokens (same formula in both themes). */
+:root {
+  --tint: color-mix(in srgb, var(--brand) 9%, var(--panel));
+  --overlay: color-mix(in srgb, var(--ink) 45%, transparent);
+  --accent-build-replay-tint: color-mix(in srgb, var(--accent-build-replay) 10%, var(--panel));
+  --accent-poster-unlocker-tint: color-mix(in srgb, var(--accent-poster-unlocker) 10%, var(--panel));
+  --accent-daftari-tint: color-mix(in srgb, var(--accent-daftari) 10%, var(--panel));
+  --accent-xerote-tint: color-mix(in srgb, var(--accent-xerote) 10%, var(--panel));
+  --accent-hardware-lab-tint: color-mix(in srgb, var(--accent-hardware-lab) 10%, var(--panel));
+  --accent: var(--brand);
+  --accent-tint: var(--tint);
+}
+
+@theme inline {
+  --color-panel: var(--panel);
+  --color-field: var(--field);
+  --color-line: var(--line);
+  --color-line-hover: var(--line-hover);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-hint: var(--hint);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-highlight: var(--highlight);
+  --color-tint: var(--tint);
+  --color-code: var(--code-bg);
+  --color-accent: var(--accent);
+  --color-accent-tint: var(--accent-tint);
+
+  /* Spacing names reused from the source app (8px grid + 4px hairline). */
+  --spacing-hair: 0.25rem;
+  --spacing-tight: 0.5rem;
+  --spacing-base: 1rem;
+  --spacing-group: 1.5rem;
+  --spacing-section: 2rem;
+  --spacing-block: 3rem;
+
+  --radius-field: 4px;
+  --shadow-pop: 0 8px 28px rgb(0 0 0 / 0.18);
+
+  --font-sans: var(--font-figtree), system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;
+  --font-mono: var(--font-mono-code), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    min-height: 100dvh;
+    background: var(--panel);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+/* Primary button keeps the same green in both themes. */
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--primary-strong);
+}
+.press {
+  transition:
+    transform 120ms ease-out,
+    background-color 150ms,
+    border-color 150ms;
+}
+.press:active {
+  transform: scale(0.98);
+}
+
+/* Motion: small and quick, transform/opacity only. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+.animate-rise {
+  animation: rise 160ms ease-out;
+}
+.animate-sheet {
+  animation: sheet-in 220ms ease-out;
+}
+.animate-pop-in {
+  animation: pop-in 160ms ease-out;
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--line) 25%, color-mix(in srgb, var(--line) 50%, var(--panel)) 50%, var(--line) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+dialog {
+  color: var(--ink);
+}
+dialog::backdrop {
+  background: var(--overlay);
+}
+
+/* Documentation typography (used by DocViewer). Token colours only. */
+.prose-doc {
+  max-width: 44rem;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  overflow-wrap: break-word;
+}
+.prose-doc > :first-child {
+  margin-top: 0;
+}
+.prose-doc h1,
+.prose-doc h2,
+.prose-doc h3,
+.prose-doc h4 {
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  scroll-margin-top: 5rem;
+}
+.prose-doc h2 {
+  font-size: 1.625rem;
+  margin: 2.75rem 0 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+.prose-doc h2:first-child {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+.prose-doc h3 {
+  font-size: 1.25rem;
+  margin: 2rem 0 0.75rem;
+}
+.prose-doc h4 {
+  font-size: 1.0625rem;
+  margin: 1.5rem 0 0.5rem;
+}
+.prose-doc p {
+  margin: 0 0 1rem;
+}
+.prose-doc a {
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.prose-doc a:hover {
+  text-decoration-thickness: 2px;
+}
+.prose-doc strong {
+  font-weight: 600;
+}
+.prose-doc ul,
+.prose-doc ol {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+}
+.prose-doc ul {
+  list-style: disc;
+}
+.prose-doc ol {
+  list-style: decimal;
+}
+.prose-doc li {
+  margin: 0.375rem 0;
+}
+.prose-doc li::marker {
+  color: var(--hint);
+}
+.prose-doc li > ul,
+.prose-doc li > ol {
+  margin: 0.375rem 0 0;
+}
+.prose-doc blockquote {
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--accent, var(--brand));
+  background: var(--accent-tint, var(--tint));
+  border-radius: 0 var(--radius-field) var(--radius-field) 0;
+  color: var(--ink);
+}
+.prose-doc blockquote > :last-child {
+  margin-bottom: 0;
+}
+.prose-doc hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2rem 0;
+}
+.prose-doc code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+.prose-doc pre {
+  margin: 0 0 1.25rem;
+  padding: 1rem;
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  overflow-x: auto;
+  line-height: 1.5;
+  font-size: 0.875rem;
+}
+.prose-doc pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+.prose-doc .table-wrap {
+  margin: 0 0 1.25rem;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--field);
+}
+.prose-doc table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.prose-doc th,
+.prose-doc td {
+  padding: 0.625rem 0.875rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.prose-doc th {
+  font-weight: 600;
+  background: var(--accent-tint, var(--tint));
+  white-space: nowrap;
+}
+.prose-doc tr:last-child td {
+  border-bottom: 0;
+}
+.prose-doc img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-iteration-count: 1 !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
