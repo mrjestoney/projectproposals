@@ -1,11 +1,12 @@
 // The 14 selectable parts of the PC setup. Info follows docs/05-3d-hardware-lab.md PART B (what it is, what it does,
 // an everyday comparison, what it connects to, common faults and signs). explode = how far the part moves in explode
-// view, in metres, in the tower's own frame (-x is towards the glass side panel). dist = how far the camera stands
+// view, in metres, in the tower's own frame (-x is towards the glass side panel). short + shift = the short label and
+// pixel offset used for explode labels on phones, so they do not overlap. dist = how far the camera stands
 // when it focuses on the part.
 
 export const PARTS = [
   {
-    id: "monitor", name: "Monitor", group: "Outside", dist: 0.9,
+    id: "monitor", short: "Monitor", shift: [0, 0], name: "Monitor", group: "Outside", dist: 0.9,
     what: "A screen that shows what the computer is doing.",
     does: "Turns the picture sent by the graphics card into light you can see.",
     comparison: "A window: it shows you the world inside the computer, but it does no thinking itself.",
@@ -13,7 +14,7 @@ export const PARTS = [
     faults: [["Black screen but fans spin", "Loose or wrong video cable, or the monitor is on the wrong input."], ["Flickering", "Faulty cable or the wrong refresh rate."]],
   },
   {
-    id: "keyboard", name: "Keyboard", group: "Outside", dist: 0.6,
+    id: "keyboard", short: "Keys", shift: [0, 0], name: "Keyboard", group: "Outside", dist: 0.6,
     what: "A board of keys you type on.",
     does: "Sends each key you press to the computer as a signal.",
     comparison: "A typewriter that talks to the computer instead of paper.",
@@ -21,7 +22,7 @@ export const PARTS = [
     faults: [["Some keys do nothing", "Dirt under the keys, or a damaged keyboard cable."], ["Nothing works at start-up", "Unplugged USB cable or a dead USB port."]],
   },
   {
-    id: "mouse", name: "Mouse", group: "Outside", dist: 0.4,
+    id: "mouse", short: "Mouse", shift: [0, 0], name: "Mouse", group: "Outside", dist: 0.4,
     what: "A small pointing device you move by hand.",
     does: "Tells the computer how far and in which direction you moved, and when you clicked.",
     comparison: "Your hand pointing at things on the screen.",
@@ -29,7 +30,7 @@ export const PARTS = [
     faults: [["Pointer jumps or freezes", "Dirty sensor or a flat battery in a wireless mouse."], ["Clicks do not register", "Worn switches under the buttons."]],
   },
   {
-    id: "case", name: "Case", group: "Shell", dist: 1.15,
+    id: "case", short: "Case", shift: [26, -14], name: "Case", group: "Shell", dist: 1.15,
     what: "The metal and glass box that holds all the parts.",
     does: "Protects the parts, holds them in place, and guides cool air through the computer.",
     comparison: "The body of a car: everything else is fitted inside it.",
@@ -37,7 +38,7 @@ export const PARTS = [
     faults: [["PC does not turn on when you press the button", "Power button cable is loose on the motherboard."], ["PC gets very hot", "Dust-blocked vents or fans fitted the wrong way."]],
   },
   {
-    id: "motherboard", name: "Motherboard", group: "Inside", explode: [-0.12, 0, 0], dist: 0.7,
+    id: "motherboard", short: "Board", shift: [30, 10], name: "Motherboard", group: "Inside", explode: [-0.12, 0, 0], dist: 0.7,
     what: "The big circuit board that every other part plugs into.",
     does: "Lets all the parts talk to each other and gives them power.",
     comparison: "A city's road network: every building (part) is joined by its roads.",
@@ -45,7 +46,7 @@ export const PARTS = [
     faults: [["No beeps and no display", "A damaged board or a failed power connection."], ["Random restarts", "Overheating chipset or bad capacitors."]],
   },
   {
-    id: "cpu", name: "CPU (processor)", group: "Inside", explode: [-0.24, 0.10, -0.09], dist: 0.35,
+    id: "cpu", short: "CPU", shift: [-32, -6], name: "CPU (processor)", group: "Inside", explode: [-0.24, 0.10, -0.09], dist: 0.35,
     what: "A small square chip in a socket on the motherboard.",
     does: "Runs the instructions of every program. It does the thinking.",
     comparison: "The brain of the computer.",
@@ -53,7 +54,7 @@ export const PARTS = [
     faults: [["Shuts down under heavy use", "CPU too hot: dusty cooler or dried thermal paste."], ["Computer will not start", "Bent socket pins or a CPU that is not seated correctly."]],
   },
   {
-    id: "cooler", name: "CPU cooler", group: "Inside", explode: [-0.38, 0.20, 0.05], dist: 0.5,
+    id: "cooler", short: "Cooler", shift: [0, 0], name: "CPU cooler", group: "Inside", explode: [-0.38, 0.20, 0.05], dist: 0.5,
     what: "A metal tower of thin fins with copper pipes and a fan.",
     does: "Pulls heat away from the CPU and blows it out, so the CPU stays cool.",
     comparison: "A radiator with a fan, like the one that cools a car engine.",
@@ -61,7 +62,7 @@ export const PARTS = [
     faults: [["PC shuts down after about 10 minutes of heavy use", "Dust between the fins or dried thermal paste."], ["Loud whirring", "Dusty or worn fan."]],
   },
   {
-    id: "ram", name: "RAM (memory)", group: "Inside", explode: [-0.30, 0.02, 0.15], dist: 0.35,
+    id: "ram", short: "RAM", shift: [6, 0], name: "RAM (memory)", group: "Inside", explode: [-0.30, 0.02, 0.15], dist: 0.35,
     what: "Two thin sticks with rows of memory chips, in slots beside the CPU.",
     does: "Holds the programs and files you are using right now, so the CPU can reach them fast.",
     comparison: "Your desk: the bigger it is, the more you can work on at once.",
@@ -69,7 +70,7 @@ export const PARTS = [
     faults: [["Fans spin, beeps, no picture", "A stick is not fully pushed into its slot."], ["Random crashes and blue screens", "A faulty memory stick."]],
   },
   {
-    id: "gpu", name: "Graphics card", group: "Inside", explode: [-0.34, -0.12, 0.0], dist: 0.55,
+    id: "gpu", short: "GPU", shift: [-34, 6], name: "Graphics card", group: "Inside", explode: [-0.34, -0.12, 0.0], dist: 0.55,
     what: "A long card with two fans, a metal back plate and a metal bracket.",
     does: "Draws the picture you see on the screen, especially for games, video and 3D.",
     comparison: "An artist who paints the picture for the screen very quickly.",
@@ -77,7 +78,7 @@ export const PARTS = [
     faults: [["No picture, or strange colours and lines", "Card not seated in the slot, or a failing card."], ["Games run slowly and the fans roar", "Dust in the fans or an overheating card."]],
   },
   {
-    id: "psu", name: "Power supply (PSU)", group: "Inside", explode: [-0.12, -0.17, 0.0], dist: 0.55,
+    id: "psu", short: "PSU", shift: [0, 14], name: "Power supply (PSU)", group: "Inside", explode: [-0.12, -0.17, 0.0], dist: 0.55,
     what: "A metal box at the bottom with a fan and a bundle of cables.",
     does: "Changes the electricity from the wall into the right voltages for each part.",
     comparison: "The heart: it pumps power around the body.",
@@ -85,7 +86,7 @@ export const PARTS = [
     faults: [["No power at all, no fans", "Power cable unplugged, switch off, or a failed PSU."], ["Random shutdowns", "A weak PSU that cannot supply enough power."]],
   },
   {
-    id: "ssd", name: "SSD (M.2)", group: "Inside", explode: [-0.24, -0.02, -0.17], dist: 0.3,
+    id: "ssd", short: "SSD", shift: [-24, 0], name: "SSD (M.2)", group: "Inside", explode: [-0.24, -0.02, -0.17], dist: 0.3,
     what: "A small stick with memory chips that lies flat on the motherboard.",
     does: "Stores your files and the operating system, even when the power is off. It is very fast.",
     comparison: "A cupboard where everything has its place, and you can find things in a flash.",
@@ -93,7 +94,7 @@ export const PARTS = [
     faults: [["Computer takes a very long time to start", "A failing drive or a nearly full one."], ["Files disappear or will not open", "Drive errors. Back up your files."]],
   },
   {
-    id: "hdd", name: "Hard drive (HDD)", group: "Inside", explode: [-0.22, -0.12, 0.16], dist: 0.35,
+    id: "hdd", short: "HDD", shift: [32, 18], name: "Hard drive (HDD)", group: "Inside", explode: [-0.22, -0.12, 0.16], dist: 0.35,
     what: "A metal box with spinning disks inside, fitted in a bay near the front.",
     does: "Stores large amounts of files cheaply, even when the power is off.",
     comparison: "A big storeroom: lots of space, but it takes longer to fetch things.",
@@ -101,7 +102,7 @@ export const PARTS = [
     faults: [["Clicking sound, very slow, files missing", "A failing hard drive. Copy your files out at once."], ["Drive not found", "Loose data or power cable."]],
   },
   {
-    id: "fans", name: "Case fans", group: "Inside", explode: [-0.20, 0.10, 0.16], dist: 0.7,
+    id: "fans", short: "Fans", shift: [34, 6], name: "Case fans", group: "Inside", explode: [-0.20, 0.10, 0.16], dist: 0.7,
     what: "Three large fans: two at the front and one at the back.",
     does: "Bring cool air into the case and push hot air out.",
     comparison: "Open windows that make a breeze through the house.",
@@ -109,7 +110,7 @@ export const PARTS = [
     faults: [["Very hot inside the case", "A fan has stopped, or it is blowing the wrong way."], ["Rattling noise", "A loose screw or a worn fan bearing."]],
   },
   {
-    id: "battery", name: "CMOS battery", group: "Inside", explode: [-0.30, -0.10, -0.12], dist: 0.25,
+    id: "battery", short: "CMOS", shift: [-4, 8], name: "CMOS battery", group: "Inside", explode: [-0.30, -0.10, -0.12], dist: 0.25,
     what: "A small silver coin-shaped battery on the motherboard.",
     does: "Keeps the clock and the BIOS settings alive while the computer is switched off.",
     comparison: "The battery in a wall clock: the clock keeps time even when the lights are off.",

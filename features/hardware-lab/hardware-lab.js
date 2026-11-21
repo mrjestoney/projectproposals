@@ -172,8 +172,9 @@ export function HardwareLab({ accent }) {
   };
 
   return (
-    <div className="p-base md:p-group">
-      <div className="mb-base flex flex-wrap items-center justify-between gap-base">
+    <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-base p-base md:p-group lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
+      {/* Below 768px the scene comes first, then the controls, then the panel (see the order classes). */}
+      <div className="flex flex-wrap items-center justify-between gap-base max-md:order-2 lg:col-span-2">
         <SegmentedControl label="Mode" options={MODES} value={mode} onChange={setMode} />
         <div className="flex flex-wrap gap-tight" role="group" aria-label="Scene controls">
           <Button variant="secondary" size="sm" onClick={() => setCaseOpen((o) => !o)} aria-pressed={caseOpen}>
@@ -195,8 +196,7 @@ export function HardwareLab({ accent }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-base lg:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
-        <div className="relative h-[55vh] min-h-[22rem] overflow-hidden rounded-field border border-line bg-panel lg:sticky lg:top-20 lg:h-[36rem]">
+        <div className="relative h-[55vh] min-h-[22rem] overflow-hidden rounded-field border border-line bg-panel max-md:order-1 lg:sticky lg:top-20 lg:h-[36rem]">
           {webgl === null ? (
             <div className="flex h-full items-center justify-center text-ink-soft" role="status">
               Loading the 3D scene…
@@ -213,7 +213,7 @@ export function HardwareLab({ accent }) {
           </p>
         </div>
 
-        <div className="min-w-0" ref={live}>
+        <div className="min-w-0 max-md:order-3" ref={live}>
           {mode === "explore" ? <ExplorePanel selected={selected} onPick={onPick} /> : null}
           {mode === "build" ? (
             <BuildPanel
@@ -278,7 +278,6 @@ export function HardwareLab({ accent }) {
             />
           ) : null}
         </div>
-      </div>
     </div>
   );
 }

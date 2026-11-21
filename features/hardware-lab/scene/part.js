@@ -95,7 +95,14 @@ export function Part({ id, position = [0, 0, 0], rotation = [0, 0, 0], children,
           {tag || ctx.tags[id] ? (
             <span className="rounded-full bg-warning px-tight py-hair text-xs font-semibold whitespace-nowrap text-paper-ink shadow-pop">{tag ?? ctx.tags[id]}</span>
           ) : (
-            <span className="rounded-full bg-field px-tight py-hair text-[10px] font-semibold whitespace-nowrap text-ink shadow-pop sm:text-xs">{info?.name}</span>
+            <span
+              className="block rounded-full bg-field px-tight py-hair text-[9px] font-semibold whitespace-nowrap text-ink shadow-pop max-md:translate-x-[var(--dx)] max-md:translate-y-[var(--dy)] md:text-xs"
+              style={{ "--dx": `${info.shift?.[0] ?? 0}px`, "--dy": `${info.shift?.[1] ?? 0}px` }}
+            >
+              {/* Phones: a short name (the full name for the selected part); larger screens: the full name. */}
+              <span className="max-md:hidden">{info.name}</span>
+              <span className="md:hidden">{ctx.selected === id ? info.name.split(" (")[0] : info.short}</span>
+            </span>
           )}
         </Html>
       ) : null}

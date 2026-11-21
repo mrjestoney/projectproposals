@@ -3,6 +3,7 @@ import { Hammer } from "lucide-react";
 import { BuildReplayPrototype } from "@/features/build-replay";
 import { DaftariPrototype } from "@/features/daftari";
 import { HardwareLabPrototype } from "@/features/hardware-lab";
+import { PosterUnlockerPrototype } from "@/features/poster-unlocker";
 import { XerotePrototype } from "@/features/xerote";
 import { PrototypeFrame } from "@/components/prototype-frame";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -24,6 +25,7 @@ export default async function PrototypePage({ params }) {
   if (slug === "build-replay") return <BuildReplayPrototype />;
   if (slug === "daftari") return <DaftariPrototype />;
   if (slug === "xerote") return <XerotePrototype />;
+  if (slug === "poster-unlocker") return <PosterUnlockerPrototype />;
   if (slug === "hardware-lab") return <HardwareLabPrototype />;
   return (
     <PrototypeFrame title={project.name}>
