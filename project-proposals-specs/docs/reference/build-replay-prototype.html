@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build Replay Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a blueprint workbench. Story card on the left, the system drawing growing on the right, timeline across the top. */
+:root{
+  --paper:#eef2f7;
+  --surface:#ffffff;
+  --ink:#14213a;
+  --muted:#5b6782;
+  --line:#d4dbe7;
+  --blue:#2450c4;
+  --blue-soft:#e6edfc;
+  --accent:#d9650f;
+  --accent-soft:#fdeedf;
+  --add-bg:#e5f5ea; --add-ink:#17663a;
+  --del-bg:#fbe7e7; --del-ink:#9b2323;
+  --code-bg:#f6f8fb;
+  --font-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0d1320; --surface:#151d2d; --ink:#e5eaf4; --muted:#95a1b9; --line:#2a3550;
+    --blue:#7fa3ff; --blue-soft:#1d2a47; --accent:#f39545; --accent-soft:#3a2716;
+    --add-bg:#13301f; --add-ink:#8fdcaa; --del-bg:#3a1919; --del-ink:#f2a3a3; --code-bg:#0f1624;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0d1320; --surface:#151d2d; --ink:#e5eaf4; --muted:#95a1b9; --line:#2a3550;
+  --blue:#7fa3ff; --blue-soft:#1d2a47; --accent:#f39545; --accent-soft:#3a2716;
+  --add-bg:#13301f; --add-ink:#8fdcaa; --del-bg:#3a1919; --del-ink:#f2a3a3; --code-bg:#0f1624;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;background-position:-1px -1px;background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;background:var(--paper);opacity:.82;z-index:-1}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+h1,h2,h3,h4{text-wrap:balance;margin:0}
+code,pre{font-family:var(--font-mono)}
+
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;margin-right:auto}
+.brand .mark{width:28px;height:28px;border-radius:7px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--font-mono);font-size:14px}
+.brand .proto{font-weight:500;font-size:12px;color:var(--accent);border:1px solid var(--accent);border-radius:99px;padding:1px 8px}
+.seg{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:7px;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg-label{font-size:12px;color:var(--muted);margin-right:6px}
+.depth{display:flex;align-items:center}
+
+.project{max-width:1240px;margin:16px auto 0;padding:0 20px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline}
+.project h1{font-size:20px;font-family:var(--font-mono);font-weight:500}
+.project p{margin:0;color:var(--muted)}
+.project .stats{font-size:13px;color:var(--muted)}
+
+main{max-width:1240px;margin:0 auto;padding:14px 20px 40px}
+.view[hidden]{display:none}
+
+/* Timeline */
+.timeline{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:14px}
+.navbtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:600;white-space:nowrap}
+.navbtn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+:root[data-theme="dark"] .navbtn.primary{color:#0d1320}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .navbtn.primary{color:#0d1320}}
+.navbtn:disabled{opacity:.4;cursor:default}
+.dots{flex:1;display:flex;gap:4px;overflow-x:auto;padding:2px}
+.dot{flex:1 0 auto;min-width:64px;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:5px 8px;text-align:left;font-size:12px;line-height:1.25;color:var(--muted)}
+.dot b{display:block;font-family:var(--font-mono);font-weight:500;font-size:11px}
+.dot.done{background:var(--blue-soft);color:var(--ink)}
+.dot.current{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+
+.walk-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:880px){.walk-grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.step-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;font-size:13px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.chip.type{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip.file{font-family:var(--font-mono);font-weight:500;background:var(--code-bg)}
+button.chip:hover{border-color:var(--blue);color:var(--blue)}
+.step h2{font-size:24px;line-height:1.2;margin-bottom:14px}
+.block{border-top:1px solid var(--line);padding:12px 0}
+.block h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.block p{margin:0;max-width:62ch}
+.block.why{background:var(--accent-soft);border:0;border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 8px 8px 0;margin:4px 0 8px}
+.block.why h3{color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+.affects{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.conn{display:flex;flex-direction:column;gap:6px}
+.conn button{text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 10px}
+.conn button:hover{border-color:var(--blue)}
+.conn b{font-weight:600}
+.term{background:#0f1624;color:#d6e2ff;border-radius:8px;padding:10px 12px;font-size:13px;margin:8px 0 0;overflow-x:auto}
+.term .out{color:#8fa0c4}
+.code-cta{margin-top:6px;border:1px dashed var(--blue);background:transparent;color:var(--blue);border-radius:8px;padding:9px 12px;font-weight:600;width:100%}
+.codezone{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.diff{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.diff-head{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 10px;background:var(--paper);border-bottom:1px solid var(--line);font-family:var(--font-mono);font-size:12.5px}
+.diff-head .tag{font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--muted)}
+.diff pre{margin:0;padding:8px 0;background:var(--code-bg);font-size:12.5px;line-height:1.55;overflow-x:auto}
+.ln{display:block;padding:0 12px 0 28px;position:relative;white-space:pre}
+.ln::before{position:absolute;left:10px;color:var(--muted)}
+.ln.add{background:var(--add-bg);color:var(--add-ink)}
+.ln.add::before{content:"+";color:var(--add-ink)}
+.ln.del{background:var(--del-bg);color:var(--del-ink)}
+.ln.del::before{content:"−";color:var(--del-ink)}
+.map{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:12.5px;margin:0;overflow-x:auto}
+.map-title{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:2px 0 6px;font-weight:600}
+
+/* Diagram */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.panel-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline;margin-bottom:6px}
+.panel-head h3{font-size:14px}
+.panel-head span{font-size:12px;color:var(--muted)}
+svg.diagram{width:100%;height:auto;display:block}
+.edge line.vis{stroke:var(--muted);stroke-width:1.6}
+.edge line.hit{stroke:transparent;stroke-width:16;cursor:pointer}
+.edge.fresh line.vis{stroke:var(--accent);stroke-width:2.4;stroke-dasharray:6 4}
+.edge.sel line.vis{stroke:var(--blue);stroke-width:3;stroke-dasharray:none}
+.edge:hover line.vis{stroke:var(--blue)}
+.node{cursor:pointer}
+.node rect{fill:var(--surface);stroke:var(--ink);stroke-width:1.5}
+.node.pkg rect{stroke-dasharray:4 3;fill:var(--paper)}
+.node text.lbl{fill:var(--ink);font-family:var(--font-body);font-weight:600;font-size:14px}
+.node text.sub{fill:var(--muted);font-family:var(--font-mono);font-size:10px}
+.node.fresh rect{stroke:var(--accent);stroke-width:2.5;fill:var(--accent-soft)}
+.node .newtag{fill:var(--accent);font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:.08em}
+.node.sel rect{stroke:var(--blue);stroke-width:3;fill:var(--blue-soft)}
+.node:hover rect{stroke:var(--blue)}
+.node.fresh{animation:pop .45s ease-out}
+@keyframes pop{from{opacity:.2}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.node.fresh{animation:none}}
+.arrow{fill:var(--muted)} .arrow-acc{fill:var(--accent)} .arrow-sel{fill:var(--blue)}
+
+.inspect{border-top:1px solid var(--line);margin-top:10px;padding-top:12px}
+.inspect .hint{color:var(--muted);font-size:14px;margin:0}
+.inspect h3{font-size:18px;margin-bottom:8px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;font-size:14px;align-items:start}
+.kv dt{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding-top:2px}
+.kv dd{margin:0}
+.snippet{margin:8px 0 0;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px;overflow-x:auto;white-space:pre}
+.linkbtn{border:0;background:none;color:var(--blue);padding:0;font-weight:600;text-align:left}
+.linkbtn:hover{text-decoration:underline}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.actions button{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600}
+.actions button:hover{border-color:var(--blue);color:var(--blue)}
+
+.sys-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:880px){.sys-grid{grid-template-columns:1fr}}
+.sys-grid .inspect{border:0;margin:0;padding:0}
+
+.files-grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:760px){.files-grid{grid-template-columns:1fr}}
+.flist{display:flex;flex-direction:column;gap:4px}
+.flist button{text-align:left;border:1px solid transparent;background:transparent;border-radius:8px;padding:8px 10px}
+.flist button:hover{background:var(--paper)}
+.flist button[aria-current="true"]{background:var(--blue-soft);border-color:var(--blue)}
+.flist .fn{font-family:var(--font-mono);font-size:13.5px;display:block}
+.flist .fm{font-size:12px;color:var(--muted)}
+.fileview h2{font-family:var(--font-mono);font-weight:500;font-size:20px;margin-bottom:6px}
+.fileview p{margin:0 0 12px;max-width:62ch}
+.fullcode{margin:12px 0 0;background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:10px 0;font-size:12.5px;line-height:1.6;overflow-x:auto;counter-reset:l}
+.fullcode span{display:block;white-space:pre;padding:0 14px 0 46px;position:relative}
+.fullcode span::before{counter-increment:l;content:counter(l);position:absolute;left:0;width:34px;text-align:right;color:var(--muted)}
+.foot{color:var(--muted);font-size:12px;text-align:center;margin-top:18px}
+@media (max-width:520px){
+  .top{padding:12px 16px}.project,main{padding-left:16px;padding-right:16px}
+  .affects{grid-template-columns:1fr}.step h2{font-size:21px}.kv{grid-template-columns:1fr}
+  .timeline{flex-wrap:wrap}.dots{order:3;flex-basis:100%}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="mark">▶︎</span>Build Replay <span class="proto">Prototype · mock data</span></div>
+  <div class="seg" role="tablist" aria-label="View">
+    <button id="tab-walk" data-view="walk" aria-pressed="true">Walkthrough</button>
+    <button id="tab-system" data-view="system" aria-pressed="false">System</button>
+    <button id="tab-files" data-view="files" aria-pressed="false">Files</button>
+  </div>
+  <div class="depth"><span class="seg-label">Detail</span>
+    <div class="seg" aria-label="Level of detail">
+      <button id="depth-story" data-depth="story" aria-pressed="true">Level 1 · Story</button>
+      <button id="depth-code" data-depth="code" aria-pressed="false">Level 2 · Code</button>
+    </div>
+  </div>
+</header>
+
+<section class="project">
+  <h1>booking-app/</h1>
+  <p>A small website where customers log in and book a room.</p>
+  <span class="stats" id="stats"></span>
+</section>
+
+<main>
+  <section id="view-walk" class="view">
+    <div class="timeline">
+      <button class="navbtn" id="prev">← Back</button>
+      <div class="dots" id="dots"></div>
+      <button class="navbtn primary" id="next">Next →</button>
+    </div>
+    <div class="walk-grid">
+      <article class="card step" id="stepcard"></article>
+      <aside class="panel">
+        <div class="panel-head"><h3>System so far</h3><span>Click a box or a line</span></div>
+        <svg class="diagram" id="walk-svg" viewBox="0 0 560 400" role="img" aria-label="System diagram"></svg>
+        <div class="inspect" id="walk-inspect"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="view-system" class="view" hidden>
+    <div class="sys-grid">
+      <div class="panel">
+        <div class="panel-head"><h3>Finished system</h3><span>Every box and line is clickable</span></div>
+        <svg class="diagram" id="sys-svg" viewBox="0 0 560 400" role="img" aria-label="Finished system diagram"></svg>
+      </div>
+      <div class="card"><div class="inspect" id="sys-inspect"></div></div>
+    </div>
+  </section>
+
+  <section id="view-files" class="view" hidden>
+    <div class="files-grid">
+      <nav class="card flist" id="flist" aria-label="Files"></nav>
+      <div class="card fileview" id="fileview"></div>
+    </div>
+  </section>
+  <p class="foot">Prototype with made-up data. Use ← → keys to move through the steps.</p>
+</main>
+
+<script>
+const NODES = {
+  website: {label:"Website", x:280, y:50, step:1, files:["index.html"],
+    what:"The page the customer opens in the browser.",
+    why:"Everything starts here. It is the screen the customer sees and the place every other part plugs into."},
+  styles: {label:"Styles", x:470, y:50, step:2, files:["styles.css"],
+    what:"Controls how the page looks.",
+    why:"Without it the page would be plain, unformatted text."},
+  bcrypt: {label:"bcryptjs", kind:"pkg", x:80, y:330, step:3, files:["package.json"],
+    what:"An outside library (package) for checking passwords safely.",
+    why:"Passwords should never be stored or compared as plain text."},
+  login: {label:"Login", x:150, y:190, step:4, files:["login.js","index.html"],
+    what:"Lets a customer prove who they are.",
+    why:"The app needs to know which customer is making a booking."},
+  booking: {label:"Booking", x:410, y:190, step:5, files:["booking.js","index.html"],
+    what:"Lets a logged-in customer choose a room and a date.",
+    why:"Booking rooms is the reason the whole app exists."},
+  database: {label:"Database", x:290, y:330, step:6, files:["database.js"],
+    what:"Stores customers and their bookings.",
+    why:"Without it, every booking would vanish when the page is closed."}
+};
+
+const EDGES = [
+  {id:"website-styles", from:"website", to:"styles", step:2,
+    why:"index.html displays the page. styles.css controls how that page looks.",
+    file:"index.html", code:'<link rel="stylesheet" href="styles.css">'},
+  {id:"website-login", from:"website", to:"login", step:4,
+    why:"The page loads login.js so the login form actually does something when submitted.",
+    file:"index.html", code:'<script src="login.js"><\/script>'},
+  {id:"login-bcrypt", from:"login", to:"bcrypt", step:4,
+    why:"Login uses bcryptjs to compare the typed password with the stored, scrambled one.",
+    file:"login.js", code:"const ok = await bcrypt.compare(password, user.passwordHash);"},
+  {id:"website-booking", from:"website", to:"booking", step:5,
+    why:"The page loads booking.js so the booking form works.",
+    file:"index.html", code:'<script src="booking.js"><\/script>'},
+  {id:"login-booking", from:"login", to:"booking", step:5,
+    why:"Booking needs to know which customer is logged in, so the booking belongs to that customer.",
+    file:"booking.js", code:"createBooking(currentUser, room.value, date.value);"},
+  {id:"login-database", from:"login", to:"database", step:6,
+    why:"Login asks the database whether an account with that email exists.",
+    file:"login.js", code:"const user = await findUser(email);"},
+  {id:"booking-database", from:"booking", to:"database", step:7,
+    why:"booking.js sends the finished booking to database.js so it is stored.",
+    file:"booking.js", code:"await saveBooking(booking);"}
+];
+
+const STEPS = [
+  {type:"File", title:"The application was started", when:"Day 1 · 09:12",
+    what:"A basic web page was created.",
+    why:"This is the starting page of the application. It is what the browser loads first.",
+    created:["index.html"], changed:[],
+    diffs:{"index.html":
+`+<!DOCTYPE html>
++<html>
++<head>
++  <title>Room Booking</title>
++</head>
++<body>
++  <h1>Book a room</h1>
++</body>
++</html>`}},
+  {type:"File", title:"The page was given its appearance", when:"Day 1 · 09:40",
+    what:"A stylesheet was added and the page was told to use it.",
+    why:"The page needed its own layout and look.",
+    created:["styles.css"], changed:["index.html"],
+    diffs:{"styles.css":
+`+body {
++  font-family: sans-serif;
++  max-width: 480px;
++  margin: 40px auto;
++}
++
++form { display: grid; gap: 8px; }
++button { padding: 10px; }`,
+    "index.html":
+`   <title>Room Booking</title>
++  <link rel="stylesheet" href="styles.css">
+ </head>`}},
+  {type:"Command", title:"A password library was installed", when:"Day 1 · 11:05",
+    what:"The builder ran a command that downloaded an outside package called bcryptjs.",
+    command:"npm install bcryptjs", output:"added 1 package in 2s",
+    why:"Login is coming next, and passwords must be checked safely, never as plain text.",
+    created:["package.json"], changed:[],
+    diffs:{"package.json":
+`+{
++  "name": "booking-app",
++  "dependencies": {
++    "bcryptjs": "^2.4.3"
++  }
++}`}},
+  {type:"Function", title:"Customers can now log in", when:"Day 1 · 11:30",
+    what:"login.js was created with a login() function, and a login form was added to the page.",
+    why:"The application needs to know which customer is making a booking.",
+    created:["login.js"], changed:["index.html"],
+    map:`login(email, password)
+│
+├── looks up the customer by email
+├── checks the password with bcryptjs
+└── remembers them as currentUser`,
+    diffs:{"login.js":
+`+const USERS = [
++  { id: 1, email: "amina@example.com", passwordHash: "$2a$10$..." }
++];
++let currentUser = null;
++
++async function login(email, password) {
++  const user = USERS.find(u => u.email === email);
++  if (!user) return showError("No account with that email");
++  const ok = await bcrypt.compare(password, user.passwordHash);
++  if (!ok) return showError("Wrong password");
++  currentUser = user;
++  showBookingForm();
++}`,
+    "index.html":
+`   <h1>Book a room</h1>
++  <form id="login-form">
++    <input id="email" placeholder="Email">
++    <input id="password" type="password">
++    <button>Log in</button>
++  </form>
++  <script src="login.js"><\/script>
+ </body>`}},
+  {type:"Function", title:"Customers can now choose a room", when:"Day 2 · 10:02",
+    what:"booking.js was created with a createBooking() function, and a booking form was added to the page.",
+    why:"Allowing customers to book rooms is the original purpose of the application.",
+    created:["booking.js"], changed:["index.html"],
+    map:`createBooking(user, room, date)
+│
+├── uses the logged-in customer  (from Login)
+├── receives the room
+├── receives the date
+└── not saved anywhere yet`,
+    diffs:{"booking.js":
+`+async function createBooking(user, room, date) {
++  if (!user) return showError("Please log in first");
++  const booking = { userId: user.id, room, date };
++  showMessage("Booked " + room + " for " + date);
++}
++
++bookingForm.addEventListener("submit", e => {
++  e.preventDefault();
++  createBooking(currentUser, room.value, date.value);
++});`,
+    "index.html":
+`   </form>
++  <form id="booking-form" hidden>
++    <select id="room">
++      <option>Room 101</option>
++      <option>Room 102</option>
++    </select>
++    <input id="date" type="date">
++    <button>Book</button>
++  </form>
+   <script src="login.js"><\/script>
++  <script src="booking.js"><\/script>`}},
+  {type:"File", title:"A database was added", when:"Day 2 · 14:20",
+    what:"database.js was created. Login was changed to look up customers there instead of a hard-coded list.",
+    why:"Customers were written directly inside login.js. They needed a proper home, and bookings need one too.",
+    created:["database.js"], changed:["login.js","index.html"],
+    diffs:{"database.js":
+`+const db = {
++  users: [{ id: 1, email: "amina@example.com", passwordHash: "$2a$10$..." }],
++  bookings: []
++};
++
++async function findUser(email) {
++  return db.users.find(u => u.email === email);
++}
++
++async function saveBooking(booking) {
++  db.bookings.push({ id: db.bookings.length + 1, ...booking });
++}`,
+    "login.js":
+`-const USERS = [
+-  { id: 1, email: "amina@example.com", passwordHash: "$2a$10$..." }
+-];
+ let currentUser = null;
+
+ async function login(email, password) {
+-  const user = USERS.find(u => u.email === email);
++  const user = await findUser(email);`,
+    "index.html":
+`+  <script src="database.js"><\/script>
+   <script src="login.js"><\/script>`}},
+  {type:"Connection", title:"Bookings are now saved", when:"Day 2 · 14:45",
+    what:"One line inside createBooking() connected Booking to the Database.",
+    why:"Until now a booking only showed a message and was then lost. It needs to be stored after the customer submits it.",
+    created:[], changed:["booking.js"],
+    map:`createBooking(user, room, date)
+│
+├── uses the logged-in customer
+├── receives room and date
+└── sends the booking to saveBooking()  →  database.js`,
+    diffs:{"booking.js":
+`   const booking = { userId: user.id, room, date };
++  await saveBooking(booking);
+   showMessage("Booked " + room + " for " + date);`}},
+  {type:"Fix", title:"Bookings in the past were blocked", when:"Day 3 · 09:15",
+    what:"A check was added so a room cannot be booked for a date that has already passed.",
+    why:"While testing, a booking for yesterday was accepted and saved. That should never happen.",
+    created:[], changed:["booking.js"],
+    diffs:{"booking.js":
+`   if (!user) return showError("Please log in first");
++  if (new Date(date) < new Date()) {
++    return showError("Choose a date in the future");
++  }
+   const booking = { userId: user.id, room, date };`}}
+];
+STEPS.forEach((s,i)=>{ s.n=i+1;
+  s.newNodes = Object.keys(NODES).filter(k=>NODES[k].step===s.n);
+  s.newEdges = EDGES.filter(e=>e.step===s.n).map(e=>e.id);
+});
+
+const FILES = {
+  "index.html":{part:"website", purpose:"The starting page. Holds the login form and the booking form, and loads the scripts.", code:
+`<!DOCTYPE html>
+<html>
+<head>
+  <title>Room Booking</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Book a room</h1>
+  <form id="login-form">
+    <input id="email" placeholder="Email">
+    <input id="password" type="password">
+    <button>Log in</button>
+  </form>
+  <form id="booking-form" hidden>
+    <select id="room">
+      <option>Room 101</option>
+      <option>Room 102</option>
+    </select>
+    <input id="date" type="date">
+    <button>Book</button>
+  </form>
+  <script src="database.js"><\/script>
+  <script src="login.js"><\/script>
+  <script src="booking.js"><\/script>
+</body>
+</html>`},
+  "styles.css":{part:"styles", purpose:"How the page looks: width, spacing and buttons.", code:
+`body {
+  font-family: sans-serif;
+  max-width: 480px;
+  margin: 40px auto;
+}
+
+form { display: grid; gap: 8px; }
+button { padding: 10px; }`},
+  "package.json":{part:"bcrypt", purpose:"Lists the outside libraries the app depends on. Here, only bcryptjs.", code:
+`{
+  "name": "booking-app",
+  "dependencies": {
+    "bcryptjs": "^2.4.3"
+  }
+}`},
+  "login.js":{part:"login", purpose:"Checks the customer's email and password and remembers who is logged in.", code:
+`let currentUser = null;
+
+async function login(email, password) {
+  const user = await findUser(email);
+  if (!user) return showError("No account with that email");
+  const ok = await bcrypt.compare(password, user.passwordHash);
+  if (!ok) return showError("Wrong password");
+  currentUser = user;
+  showBookingForm();
+}`},
+  "booking.js":{part:"booking", purpose:"Creates a booking for the logged-in customer and sends it to be saved.", code:
+`async function createBooking(user, room, date) {
+  if (!user) return showError("Please log in first");
+  if (new Date(date) < new Date()) {
+    return showError("Choose a date in the future");
+  }
+  const booking = { userId: user.id, room, date };
+  await saveBooking(booking);
+  showMessage("Booked " + room + " for " + date);
+}
+
+bookingForm.addEventListener("submit", e => {
+  e.preventDefault();
+  createBooking(currentUser, room.value, date.value);
+});`},
+  "database.js":{part:"database", purpose:"Keeps customers and bookings, and offers findUser() and saveBooking().", code:
+`const db = {
+  users: [{ id: 1, email: "amina@example.com", passwordHash: "$2a$10$..." }],
+  bookings: []
+};
+
+async function findUser(email) {
+  return db.users.find(u => u.email === email);
+}
+
+async function saveBooking(booking) {
+  db.bookings.push({ id: db.bookings.length + 1, ...booking });
+}`}
+};
+Object.keys(FILES).forEach(f=>{
+  FILES[f].created = STEPS.find(s=>s.created.includes(f)).n;
+  FILES[f].changedIn = STEPS.filter(s=>s.changed.includes(f)).map(s=>s.n);
+});
+
+const state = {view:"walk", step:1, depth:"story", walkSel:null, sysSel:{type:"node",id:"booking"}, file:"booking.js"};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const edgeById = id => EDGES.find(e=>e.id===id);
+const stepTitle = n => STEPS[n-1].title;
+
+$("stats").textContent = Object.keys(FILES).length + " files · " + STEPS.length + " building steps";
+
+/* ---------- Diagram ---------- */
+function boxSize(id){ return NODES[id].kind==="pkg" ? [52,20] : [64,25]; }
+function clip(a,b){
+  const [w,h]=boxSize(a); const A=NODES[a], B=NODES[b];
+  const dx=B.x-A.x, dy=B.y-A.y;
+  const t=Math.min(dx?w/Math.abs(dx):Infinity, dy?h/Math.abs(dy):Infinity);
+  return [A.x+dx*t, A.y+dy*t];
+}
+function drawDiagram(svg, opt){
+  let out = `<defs>
+    <marker id="${svg.id}-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="${svg.id}-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-acc" d="M0,0 L10,5 L0,10 z"/></marker>
+    <marker id="${svg.id}-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrow-sel" d="M0,0 L10,5 L0,10 z"/></marker>
+  </defs>`;
+  EDGES.filter(e=>opt.edges.has(e.id)).forEach(e=>{
+    const [x1,y1]=clip(e.from,e.to), [x2,y2]=clip(e.to,e.from);
+    const sel = opt.sel && opt.sel.type==="edge" && opt.sel.id===e.id;
+    const fresh = opt.freshEdges.has(e.id);
+    const m = sel ? "c" : fresh ? "b" : "a";
+    out += `<g class="edge${fresh?" fresh":""}${sel?" sel":""}" data-edge="${e.id}" tabindex="0" role="button" aria-label="Why are ${NODES[e.from].label} and ${NODES[e.to].label} connected?">
+      <line class="vis" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#${svg.id}-${m})"/>
+      <line class="hit" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/></g>`;
+  });
+  Object.keys(NODES).filter(k=>opt.nodes.has(k)).forEach(k=>{
+    const n=NODES[k], [w,h]=boxSize(k);
+    const sel = opt.sel && opt.sel.type==="node" && opt.sel.id===k;
+    const fresh = opt.freshNodes.has(k);
+    const sub = n.kind==="pkg" ? "package" : n.files[0];
+    out += `<g class="node${n.kind==="pkg"?" pkg":""}${fresh?" fresh":""}${sel?" sel":""}" data-node="${k}" tabindex="0" role="button" aria-label="${n.label}">
+      <rect x="${n.x-w}" y="${n.y-h}" width="${w*2}" height="${h*2}" rx="9"/>
+      <text class="lbl" x="${n.x}" y="${n.y+(n.kind==="pkg"?-1:-2)}" text-anchor="middle">${n.label}</text>
+      <text class="sub" x="${n.x}" y="${n.y+(n.kind==="pkg"?12:14)}" text-anchor="middle">${esc(sub)}</text>
+      ${fresh?`<text class="newtag" x="${n.x+w}" y="${n.y-h-5}" text-anchor="end">NEW</text>`:""}
+    </g>`;
+  });
+  svg.innerHTML = out;
+}
+function hookDiagram(svg, onPick){
+  const pick = t => {
+    const n=t.closest("[data-node]"), e=t.closest("[data-edge]");
+    if(n) onPick({type:"node", id:n.dataset.node});
+    else if(e) onPick({type:"edge", id:e.dataset.edge});
+  };
+  svg.addEventListener("click", ev=>pick(ev.target));
+  svg.addEventListener("keydown", ev=>{ if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();pick(ev.target);} });
+}
+
+/* ---------- Inspector ---------- */
+function nodeChip(id){ return `<button class="chip" data-pick-node="${id}">${NODES[id].label}</button>`; }
+function fileChip(f){ return `<button class="chip file" data-open-file="${f}">${esc(f)}</button>`; }
+function inspectorHTML(sel, limitStep){
+  if(!sel) return `<p class="hint">Click any box to ask <b>what it is</b>, or any line to ask <b>why two parts are connected</b>.</p>`;
+  const visible = e => !limitStep || e.step<=limitStep;
+  if(sel.type==="node"){
+    const n=NODES[sel.id];
+    const uses = EDGES.filter(e=>e.from===sel.id && visible(e)).map(e=>nodeChip(e.to)).join(" ") || "<span style='color:var(--muted)'>Nothing yet</span>";
+    const usedBy = EDGES.filter(e=>e.to===sel.id && visible(e)).map(e=>nodeChip(e.from)).join(" ") || "<span style='color:var(--muted)'>Nothing yet</span>";
+    return `<h3>${n.label}</h3>
+    <dl class="kv">
+      <dt>What is it?</dt><dd>${n.what}</dd>
+      <dt>Why?</dt><dd>${n.why}</dd>
+      <dt>Files</dt><dd class="row">${n.files.map(fileChip).join("")}</dd>
+      <dt>Uses</dt><dd class="row">${uses}</dd>
+      <dt>Used by</dt><dd class="row">${usedBy}</dd>
+      <dt>Appeared</dt><dd><button class="linkbtn" data-jump="${n.step}">Step ${n.step} · ${stepTitle(n.step)}</button></dd>
+    </dl>`;
+  }
+  const e=edgeById(sel.id);
+  return `<h3>${NODES[e.from].label} → ${NODES[e.to].label}</h3>
+    <dl class="kv">
+      <dt>Why connected?</dt><dd>${e.why}</dd>
+      <dt>Created</dt><dd><button class="linkbtn" data-jump="${e.step}">Step ${e.step} · ${stepTitle(e.step)}</button></dd>
+    </dl>
+    ${state.depth==="code" ? `<div class="snippet">${esc(e.file)}\n\n${esc(e.code)}</div>` : ""}
+    <div class="actions">
+      ${state.depth==="story" ? `<button data-depth-set="code">Show the exact code</button>` : ""}
+      <button data-open-file="${e.file}">Open ${esc(e.file)}</button>
+    </div>`;
+}
+
+/* ---------- Walkthrough ---------- */
+function diffHTML(file, text, isNew){
+  const lines = text.split("\n").map(l=>{
+    const c=l[0], body=esc(l.slice(1));
+    const cls = c==="+"?"add":c==="-"?"del":"";
+    return `<span class="ln ${cls}">${body || " "}</span>`;
+  }).join("");
+  return `<div class="diff"><div class="diff-head"><span>${esc(file)}</span><span class="tag">${isNew?"NEW FILE":"CHANGED"}</span></div><pre>${lines}</pre></div>`;
+}
+function renderStep(){
+  const s=STEPS[state.step-1];
+  const conns = s.newEdges.map(id=>{const e=edgeById(id);
+    return `<button data-pick-edge="${id}"><b>${NODES[e.from].label} → ${NODES[e.to].label}</b><br><span style="color:var(--muted);font-size:14px">${e.why}</span></button>`;}).join("");
+  let html = `<div class="step-head"><span class="chip type">${s.type}</span><span>Step ${s.n} of ${STEPS.length}</span><span>·</span><span>${s.when}</span></div>
+    <h2>${s.title}</h2>
+    <div class="block"><h3>What happened?</h3><p>${s.what}</p>
+      ${s.command?`<pre class="term">$ ${esc(s.command)}\n<span class="out">${esc(s.output)}</span></pre>`:""}</div>
+    <div class="block why"><h3>Why?</h3><p>${s.why}</p></div>
+    <div class="block affects">
+      <div><h3>This step created</h3><div class="row">${s.created.map(fileChip).join("") || "<span style='color:var(--muted)'>No new files</span>"}</div></div>
+      <div><h3>This step changed</h3><div class="row">${s.changed.map(fileChip).join("") || "<span style='color:var(--muted)'>Nothing existing</span>"}</div></div>
+    </div>`;
+  if(conns) html += `<div class="block"><h3>New connections</h3><div class="conn">${conns}</div></div>`;
+  if(state.depth==="story"){
+    html += `<button class="code-cta" data-depth-set="code">Show the code for this step</button>`;
+  } else {
+    html += `<div class="block"><h3>The actual construction</h3><div class="codezone">
+      ${s.map?`<div><div class="map-title">How it connects</div><pre class="map">${esc(s.map)}</pre></div>`:""}
+      ${Object.entries(s.diffs).map(([f,t])=>diffHTML(f,t,s.created.includes(f))).join("")}
+    </div></div>`;
+  }
+  $("stepcard").innerHTML = html;
+
+  $("dots").innerHTML = STEPS.map(x=>`<button class="dot ${x.n<state.step?"done":""} ${x.n===state.step?"current":""}" data-jump="${x.n}" aria-label="Step ${x.n}: ${esc(x.title)}"><b>${x.n} · ${x.type}</b></button>`).join("");
+  const cur = $("dots").querySelector(".current"); if(cur) cur.scrollIntoView({block:"nearest",inline:"nearest"});
+  $("prev").disabled = state.step===1;
+  $("next").textContent = state.step===STEPS.length ? "See the System →" : "Next →";
+
+  const nodes=new Set(Object.keys(NODES).filter(k=>NODES[k].step<=state.step));
+  const edges=new Set(EDGES.filter(e=>e.step<=state.step).map(e=>e.id));
+  drawDiagram($("walk-svg"), {nodes, edges, freshNodes:new Set(s.newNodes), freshEdges:new Set(s.newEdges), sel:state.walkSel});
+  $("walk-inspect").innerHTML = inspectorHTML(state.walkSel, state.step);
+}
+
+/* ---------- System ---------- */
+function renderSystem(){
+  drawDiagram($("sys-svg"), {nodes:new Set(Object.keys(NODES)), edges:new Set(EDGES.map(e=>e.id)), freshNodes:new Set(), freshEdges:new Set(), sel:state.sysSel});
+  $("sys-inspect").innerHTML = inspectorHTML(state.sysSel, null);
+}
+
+/* ---------- Files ---------- */
+function renderFiles(){
+  $("flist").innerHTML = Object.keys(FILES).map(f=>`<button data-open-file="${f}" aria-current="${f===state.file}">
+    <span class="fn">${esc(f)}</span><span class="fm">${NODES[FILES[f].part].label} · from Step ${FILES[f].created}</span></button>`).join("");
+  const F=FILES[state.file];
+  $("fileview").innerHTML = `<h2>${esc(state.file)}</h2><p>${F.purpose}</p>
+    <dl class="kv">
+      <dt>Part of</dt><dd>${nodeChip(F.part)}</dd>
+      <dt>Created</dt><dd><button class="linkbtn" data-jump="${F.created}">Step ${F.created} · ${stepTitle(F.created)}</button></dd>
+      <dt>Changed</dt><dd>${F.changedIn.length ? F.changedIn.map(n=>`<button class="linkbtn" data-jump="${n}">Step ${n} · ${stepTitle(n)}</button>`).join("<br>") : "<span style='color:var(--muted)'>Never changed after it was created</span>"}</dd>
+    </dl>
+    ${state.depth==="code"
+      ? `<pre class="fullcode">${F.code.split("\n").map(l=>`<span>${esc(l)||" "}</span>`).join("")}</pre>`
+      : `<div class="actions"><button data-depth-set="code">Show code</button></div>`}`;
+}
+
+/* ---------- App ---------- */
+function render(){
+  ["walk","system","files"].forEach(v=>{
+    $("view-"+v).hidden = state.view!==v;
+    $("tab-"+v).setAttribute("aria-pressed", state.view===v);
+  });
+  $("depth-story").setAttribute("aria-pressed", state.depth==="story");
+  $("depth-code").setAttribute("aria-pressed", state.depth==="code");
+  if(state.view==="walk") renderStep();
+  if(state.view==="system") renderSystem();
+  if(state.view==="files") renderFiles();
+}
+function go(step){ state.step=Math.max(1,Math.min(STEPS.length,step)); state.walkSel=null; state.view="walk"; render(); window.scrollTo({top:0}); }
+
+hookDiagram($("walk-svg"), sel=>{ state.walkSel=sel; render(); });
+hookDiagram($("sys-svg"), sel=>{ state.sysSel=sel; render(); });
+
+document.addEventListener("click", ev=>{
+  const t=ev.target.closest("button"); if(!t) return;
+  const d=t.dataset;
+  if(d.view){ state.view=d.view; render(); }
+  else if(d.depth){ state.depth=d.depth; render(); }
+  else if(d.depthSet){ state.depth=d.depthSet; render(); }
+  else if(d.jump){ go(+d.jump); }
+  else if(d.openFile){ state.file=d.openFile; state.view="files"; render(); }
+  else if(d.pickNode){ if(state.view==="walk") state.walkSel={type:"node",id:d.pickNode}; else { state.sysSel={type:"node",id:d.pickNode}; state.view="system"; } render(); }
+  else if(d.pickEdge){ state.walkSel={type:"edge",id:d.pickEdge}; render(); }
+});
+$("prev").addEventListener("click", ()=>go(state.step-1));
+$("next").addEventListener("click", ()=>{ if(state.step===STEPS.length){ state.view="system"; render(); } else go(state.step+1); });
+document.addEventListener("keydown", ev=>{
+  if(state.view!=="walk" || ev.target.closest("input,textarea")) return;
+  if(ev.key==="ArrowRight") $("next").click();
+  if(ev.key==="ArrowLeft" && state.step>1) go(state.step-1);
+});
+render();
+</script>
+</body>
+</html>
