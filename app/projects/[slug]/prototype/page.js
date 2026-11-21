@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Hammer } from "lucide-react";
 import { BuildReplayPrototype } from "@/features/build-replay";
 import { DaftariPrototype } from "@/features/daftari";
+import { HardwareLabPrototype } from "@/features/hardware-lab";
 import { XerotePrototype } from "@/features/xerote";
 import { PrototypeFrame } from "@/components/prototype-frame";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -23,6 +24,7 @@ export default async function PrototypePage({ params }) {
   if (slug === "build-replay") return <BuildReplayPrototype />;
   if (slug === "daftari") return <DaftariPrototype />;
   if (slug === "xerote") return <XerotePrototype />;
+  if (slug === "hardware-lab") return <HardwareLabPrototype />;
   return (
     <PrototypeFrame title={project.name}>
       <EmptyState icon={<Hammer className="size-7" />} title="Prototype coming in the next task">

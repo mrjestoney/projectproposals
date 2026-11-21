@@ -1,5 +1,6 @@
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CREDITS } from "@/features/hardware-lab/data/part-map";
 
 export const metadata = { title: "About", description: "What this collection is and how to use it." };
 
@@ -39,6 +40,34 @@ export default function About() {
           delay followed by a pre-written result. Nothing you type is stored or sent anywhere.
         </p>
       </Card>
+
+      <h2 className="mt-section text-2xl font-semibold tracking-tight">Credits</h2>
+      <p className="mt-base text-ink-soft">
+        The 3D Hardware Lab is drawn in the browser with{" "}
+        <a href="https://threejs.org" target="_blank" rel="noopener noreferrer" className="text-brand underline underline-offset-4">
+          three.js
+        </a>{" "}
+        (MIT licence) and{" "}
+        <a href="https://github.com/pmndrs/react-three-fiber" target="_blank" rel="noopener noreferrer" className="text-brand underline underline-offset-4">
+          React Three Fiber
+        </a>
+        .{" "}
+        {CREDITS.length
+          ? "3D models: "
+          : "Every part of the PC, the monitor, the keyboard and the mouse is built in code. No 3D models from other authors are used."}
+      </p>
+      {CREDITS.length ? (
+        <ul className="mt-tight list-disc pl-group text-ink-soft">
+          {CREDITS.map((c) => (
+            <li key={c.url}>
+              <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-brand underline underline-offset-4">
+                {c.title}
+              </a>{" "}
+              by {c.author}, {c.licence}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <ButtonLink href="/" size="lg" className="mt-section">
         See the projects

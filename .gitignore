@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# original 3D model downloads (only optimised files in public/models/ are shipped)
+/models-src/

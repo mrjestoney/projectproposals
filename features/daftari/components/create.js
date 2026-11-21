@@ -11,6 +11,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Tabs } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
+import { copyText } from "@/lib/copy-text";
 import { EXAM_FORMAT } from "../data/brain";
 import {
   CHIPS,
@@ -268,14 +269,7 @@ export function Create({ cr, setCr, items, facts, onSaveGolden }) {
   };
   const termText = termLabel(facts.find((f) => f.id === "term")?.value ?? "");
 
-  const copy = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast("Copied as text");
-    } catch {
-      toast("Copying is not available in this browser");
-    }
-  };
+  const copy = (text) => copyText(text, toast, "Copied as text");
   const print = () => {
     setExportOpen(false);
     setTimeout(() => {
