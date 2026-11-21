@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Hammer } from "lucide-react";
+import { BuildReplayPrototype } from "@/features/build-replay";
 import { PrototypeFrame } from "@/components/prototype-frame";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getProject, projectSlugs } from "@/lib/projects";
@@ -17,6 +18,7 @@ export default async function PrototypePage({ params }) {
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) notFound();
+  if (slug === "build-replay") return <BuildReplayPrototype />;
   return (
     <PrototypeFrame title={project.name}>
       <EmptyState icon={<Hammer className="size-7" />} title="Prototype coming in the next task">
