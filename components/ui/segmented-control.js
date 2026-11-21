@@ -23,7 +23,7 @@ export function SegmentedControl({ options, value, onChange, label, className = 
             onChange={() => onChange(o.value)}
             className="peer sr-only"
           />
-          <span className="flex min-h-9 items-center gap-hair rounded-full px-base text-sm font-medium whitespace-nowrap text-ink-soft transition-colors peer-checked:bg-primary peer-checked:text-white hover:text-ink peer-checked:hover:text-white">
+          <span className="flex min-h-9 items-center gap-hair rounded-full px-base text-sm font-medium whitespace-nowrap text-ink-soft transition-colors peer-checked:bg-primary peer-checked:text-on-primary hover:text-ink peer-checked:hover:text-on-primary">
             {o.icon}
             {o.label}
           </span>

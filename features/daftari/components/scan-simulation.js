@@ -10,7 +10,7 @@ import { HandwrittenPage } from "./handwritten-page";
 
 /** Camera viewfinder: dark frame with corner guides around whatever is "seen". */
 export function CameraFrame({ children, overlay }) {
-  const corner = "absolute size-8 border-white/80";
+  const corner = "absolute size-8 border-paper/80";
   return (
     <div className="relative mx-auto w-full max-w-md overflow-hidden rounded-field bg-camera p-group">
       <span aria-hidden="true" className={`${corner} top-tight left-tight rounded-tl-field border-t-[3px] border-l-[3px]`} />
@@ -52,11 +52,11 @@ export function ScanSimulation({ onDone }) {
         overlay={
           <div className="pointer-events-none absolute inset-x-0 top-group flex justify-center" aria-hidden="true">
             {frame.state === "turn" ? (
-              <span className="animate-pop-in flex items-center gap-tight rounded-full bg-white px-base py-tight text-sm font-semibold text-camera">
+              <span className="animate-pop-in flex items-center gap-tight rounded-full bg-paper px-base py-tight text-sm font-semibold text-camera">
                 <Hand className="size-4" /> Page turn detected
               </span>
             ) : frame.state === "captured" ? (
-              <span className="animate-pop-in flex items-center gap-tight rounded-full bg-white px-base py-tight text-sm font-semibold text-camera">
+              <span className="animate-pop-in flex items-center gap-tight rounded-full bg-paper px-base py-tight text-sm font-semibold text-camera">
                 <Check className="size-4" /> Page {frame.page} captured
               </span>
             ) : null}

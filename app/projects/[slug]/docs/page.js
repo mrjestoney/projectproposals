@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/meta";
 import { notFound } from "next/navigation";
 import { DocViewer } from "@/components/doc-viewer";
 import { getProposal } from "@/lib/content";
@@ -9,7 +10,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const project = getProject((await params).slug);
-  return project ? { title: `${project.name} · Proposal`, description: project.tagline } : {};
+  return project ? pageMeta(`${project.name} · Proposal`, project.tagline) : {};
 }
 
 export default async function DocsPage({ params }) {

@@ -35,7 +35,7 @@ function Loop({ stage }) {
           <span
             aria-current={i === stage ? "step" : undefined}
             className={`rounded-full border px-base py-hair text-sm font-medium ${
-              i === stage ? "border-transparent bg-primary text-white" : i < stage ? "border-line bg-tint text-ink" : "border-line bg-field text-ink-soft"
+              i === stage ? "border-transparent bg-primary text-on-primary" : i < stage ? "border-line bg-tint text-ink" : "border-line bg-field text-ink-soft"
             }`}
           >
             {i + 1}. {n}

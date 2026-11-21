@@ -12,7 +12,7 @@ export function AppShell({ children }) {
         Skip to content
       </a>
       <SiteHeader />
-      <main id="main" className="mx-auto w-full max-w-[1200px] flex-1 px-base md:px-section">
+      <main id="main" tabIndex={-1} className="outline-none mx-auto w-full max-w-[1200px] flex-1 px-base md:px-section">
         {children}
       </main>
       <footer className="mt-block border-t border-line">

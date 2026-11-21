@@ -18,6 +18,7 @@
   --primary: #14684b;
   --primary-strong: #0f5a40;
   --logo-deep: #0c4533;
+  --on-primary: #ffffff; /* text and knobs on the green primary colour: the same in both themes */
   --danger: #c0361a;
   --success: #14684b;
   --warning: #8a5a00;
@@ -119,6 +120,7 @@
   --color-brand-ink: var(--brand-ink);
   --color-primary: var(--primary);
   --color-primary-strong: var(--primary-strong);
+  --color-on-primary: var(--on-primary);
   --color-danger: var(--danger);
   --color-success: var(--success);
   --color-warning: var(--warning);
@@ -171,7 +173,7 @@
 /* Primary button keeps the same green in both themes. */
 .btn-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
 }
 .btn-primary:hover {
   background: var(--primary-strong);

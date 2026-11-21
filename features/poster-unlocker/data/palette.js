@@ -12,7 +12,7 @@ export const FONT_WEIGHTS = [
   { value: "400", label: "Regular" },
   { value: "500", label: "Medium" },
   { value: "700", label: "Bold" },
-  { value: "800", label: "Extra bold" },
+  { value: "800", label: "Black" },
 ];
 
 /** Text on the amber pill and band stays dark; on dark colours it turns white. */

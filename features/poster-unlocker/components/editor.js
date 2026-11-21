@@ -92,7 +92,7 @@ export function Editor({ h, original, ui, actions }) {
                   <div className="pointer-events-none absolute inset-0" style={{ clipPath: `inset(0 ${100 - compareAt}% 0 0)` }}>
                     <Poster doc={original} mode="flat" fill />
                   </div>
-                  <div className="pointer-events-none absolute inset-y-0 w-0.5 bg-white shadow-pop" style={{ left: `${compareAt}%` }} aria-hidden="true" />
+                  <div className="pointer-events-none absolute inset-y-0 w-0.5 bg-paper shadow-pop" style={{ left: `${compareAt}%` }} aria-hidden="true" />
                 </>
               ) : null}
             </div>

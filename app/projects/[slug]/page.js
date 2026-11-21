@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/meta";
 import { notFound } from "next/navigation";
 import { BookOpen, FlaskConical } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
@@ -11,7 +12,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const project = getProject((await params).slug);
-  return project ? { title: project.name, description: project.tagline } : {};
+  return project ? pageMeta(project.name, project.tagline) : {};
 }
 
 export default async function ProjectPage({ params }) {

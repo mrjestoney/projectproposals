@@ -13,7 +13,7 @@ export function Switch({ checked, onChange, label, hideLabel = false, className 
       >
         <span
           aria-hidden="true"
-          className={`absolute top-hair left-hair size-4 rounded-full bg-white transition-transform ${checked ? "translate-x-5" : ""}`}
+          className={`absolute top-hair left-hair size-4 rounded-full bg-on-primary transition-transform ${checked ? "translate-x-5" : ""}`}
         />
         <span className="sr-only">{label}</span>
       </button>

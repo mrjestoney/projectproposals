@@ -126,7 +126,7 @@ export function EditPanel({ doc, selected, palette, onText, onProp, onPropCommit
                 className={`flex size-11 items-center justify-center rounded-full border-2 ${p.color === c.value ? "border-accent" : "border-line"}`}
                 style={{ background: c.value }}
               >
-                {p.color === c.value ? <Check className="size-4 text-white mix-blend-difference" aria-hidden="true" /> : null}
+                {p.color === c.value ? <Check className="size-4 text-on-primary mix-blend-difference" aria-hidden="true" /> : null}
               </button>
             </li>
           ))}

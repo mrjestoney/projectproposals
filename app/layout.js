@@ -5,9 +5,12 @@ import "./globals.css";
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono-code", display: "swap" });
 
+const description = "Five project proposals. Read each one, then try its prototype.";
+
 export const metadata = {
   title: { default: "Project Proposals", template: "%s · Project Proposals" },
-  description: "Five project proposals. Read each one, then try its prototype.",
+  description,
+  openGraph: { title: "Project Proposals", description, type: "website", siteName: "Project Proposals" },
 };
 
 export const viewport = {

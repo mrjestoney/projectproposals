@@ -86,12 +86,9 @@ export function Poster({
     const isSel = edit && selected === def.id;
     const flagged = edit && doc.flags[def.id];
     const flash = flashIds.includes(def.id);
-    const common = {
-      key: def.id,
-      "data-layer": def.id,
-      className: `absolute ${edit && def.type !== "background" ? "cursor-move" : ""} ${flash ? "poster-flash" : ""}`,
-      style: { ...style, transition: move, touchAction: edit && def.type !== "background" ? "none" : undefined, outline: isSel ? "2px solid var(--accent)" : undefined, outlineOffset: isSel ? 3 : undefined },
-      ...(edit
+    const cls = `${edit && def.type !== "background" ? "cursor-move" : ""} ${flash ? "poster-flash" : ""}`;
+    const look = { transition: move, touchAction: edit && def.type !== "background" ? "none" : undefined, outline: isSel ? "2px solid var(--accent)" : undefined, outlineOffset: isSel ? 3 : undefined };
+    const interact = edit
         ? {
             role: "button", tabIndex: 0, "aria-pressed": isSel,
             "aria-label": `${def.name}${flagged ? " (needs checking)" : ""}${p.locked ? " (locked)" : ""}`,
@@ -103,17 +100,23 @@ export function Poster({
               if (d && !p.locked && def.type !== "background") (e.preventDefault(), onNudge(def.id, d[0], d[1], box(def.id)));
             },
           }
-        : {}),
-    };
+        : {};
+    const common = { key: def.id, "data-layer": def.id, className: `absolute ${cls}`, style: { ...style, ...look }, ...interact };
     const badge = flagged ? (
-      <span className="absolute -top-4 -right-5 z-30 flex size-6 items-center justify-center rounded-full bg-warning text-white shadow-pop" style={{ fontSize: 0 }}>
+      <span className="absolute -top-4 -right-4 z-30 flex size-6 items-center justify-center rounded-full bg-warning text-on-primary shadow-pop" style={{ fontSize: 0 }}>
         <AlertTriangle className="size-3.5" aria-hidden="true" />
       </span>
     ) : null;
+    // Text layers show the warning inline, right after the last word, whatever the alignment.
+    const inlineBadge = (
+      <span aria-hidden="true" className="ml-1 inline-flex size-5 translate-y-[-0.1em] items-center justify-center rounded-full bg-warning align-middle text-on-primary shadow-pop" style={{ fontSize: 0 }}>
+        <AlertTriangle className="size-3" />
+      </span>
+    );
     const handles = isSel ? (
       <>
         {["-top-1 -left-1", "-top-1 -right-1", "-bottom-1 -left-1", "-bottom-1 -right-1"].map((c) => (
-          <span key={c} aria-hidden="true" className={`absolute ${c} size-2 rounded-[2px] border border-accent bg-white`} />
+          <span key={c} aria-hidden="true" className={`absolute ${c} size-2 rounded-[2px] border border-accent bg-paper`} />
         ))}
       </>
     ) : null;
@@ -169,13 +172,22 @@ export function Poster({
         );
       }
       default: {
+        // The box is as wide as the text, placed inside the layer's area according to its alignment, so the outline and
+        // the warning badge sit right next to the words (left, centred or right).
         const editing = editingId === def.id;
+        const justify = p.align === "center" ? "center" : p.align === "right" ? "flex-end" : "flex-start";
         return (
-          <div {...common} style={{ ...common.style, height: undefined, width: p.align === "left" ? "fit-content" : common.style.width, maxWidth: common.style.width }}>
-            <Editable id={def.id} editing={editing} value={text(def.id)} onEnd={onEditEnd}
-              style={{ fontFamily: font(def.id), fontSize: `${p.size * m.s}cqw`, fontWeight: p.weight, color: p.color, textAlign: p.align, lineHeight: 1.1, transition: move }} />
-            {badge}
-            {handles}
+          <div key={def.id} className="pointer-events-none absolute flex" style={{ left: style.left, top: style.top, width: style.width, justifyContent: justify, transition: move }}>
+            <div
+              {...interact}
+              data-layer={def.id}
+              className={`relative ${cls}`}
+              style={{ ...look, width: "fit-content", maxWidth: "100%", pointerEvents: "auto" }}
+            >
+              <Editable id={def.id} editing={editing} value={text(def.id)} onEnd={onEditEnd} after={flagged ? inlineBadge : null}
+                style={{ fontFamily: font(def.id), fontSize: `${p.size * m.s}cqw`, fontWeight: p.weight, color: p.color, textAlign: p.align, lineHeight: 1.1, transition: move }} />
+              {handles}
+            </div>
           </div>
         );
       }
@@ -200,7 +212,7 @@ export function Poster({
 }
 
 /** Text that can be edited in place. While editing, the browser owns the text; it is saved when you leave the box. */
-function Editable({ id, editing, value, onEnd, style }) {
+function Editable({ id, editing, value, onEnd, style, after = null }) {
   const ref = useRef(null);
   useEffect(() => {
     if (editing && ref.current) {
@@ -225,6 +237,7 @@ function Editable({ id, editing, value, onEnd, style }) {
       style={{ display: "block", width: "100%", outline: "none", cursor: editing ? "text" : undefined, userSelect: editing ? "text" : "none", ...style }}
     >
       {value}
+      {editing ? null : after}
     </span>
   );
 }

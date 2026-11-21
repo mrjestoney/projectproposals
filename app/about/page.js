@@ -1,8 +1,9 @@
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { pageMeta } from "@/lib/meta";
 import { CREDITS } from "@/features/hardware-lab/data/part-map";
 
-export const metadata = { title: "About", description: "What this collection is and how to use it." };
+export const metadata = pageMeta("About", "What this collection is and how to use it.");
 
 const steps = [
   ["Pick a project", "Open any of the five projects from the home page."],
@@ -41,7 +42,7 @@ export default function About() {
         </p>
       </Card>
 
-      <h2 className="mt-section text-2xl font-semibold tracking-tight">Credits</h2>
+      <h2 className="mt-section text-2xl font-semibold tracking-tight">Credits &amp; notes</h2>
       <p className="mt-base text-ink-soft">
         The 3D Hardware Lab is drawn in the browser with{" "}
         <a href="https://threejs.org" target="_blank" rel="noopener noreferrer" className="text-brand underline underline-offset-4">
@@ -55,6 +56,9 @@ export default function About() {
         {CREDITS.length
           ? "3D models: "
           : "Every part of the PC, the monitor, the keyboard and the mouse is built in code. No 3D models from other authors are used."}
+      </p>
+      <p className="mt-base text-ink-soft">
+        The Biology questions and answers in the Daftari prototype are sample content. They are written to Form 2 level but have not been reviewed by a Biology teacher yet.
       </p>
       {CREDITS.length ? (
         <ul className="mt-tight list-disc pl-group text-ink-soft">

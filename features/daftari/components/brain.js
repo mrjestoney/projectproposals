@@ -69,7 +69,7 @@ function BankDetail() {
             aria-pressed={topic === t}
             onClick={() => setTopic(t)}
             className={`min-h-9 rounded-full border px-base text-sm font-medium ${
-              topic === t ? "border-transparent bg-primary text-white" : "border-line bg-field text-ink-soft hover:border-line-hover"
+              topic === t ? "border-transparent bg-primary text-on-primary" : "border-line bg-field text-ink-soft hover:border-line-hover"
             }`}
           >
             {t}

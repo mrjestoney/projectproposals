@@ -1,12 +1,6 @@
 import { notFound } from "next/navigation";
-import { Hammer } from "lucide-react";
-import { BuildReplayPrototype } from "@/features/build-replay";
-import { DaftariPrototype } from "@/features/daftari";
-import { HardwareLabPrototype } from "@/features/hardware-lab";
-import { PosterUnlockerPrototype } from "@/features/poster-unlocker";
-import { XerotePrototype } from "@/features/xerote";
-import { PrototypeFrame } from "@/components/prototype-frame";
-import { EmptyState } from "@/components/ui/empty-state";
+import { PrototypeLoader } from "@/components/prototype-loader";
+import { pageMeta } from "@/lib/meta";
 import { getProject, projectSlugs } from "@/lib/projects";
 
 export function generateStaticParams() {
@@ -15,23 +9,11 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const project = getProject((await params).slug);
-  return project ? { title: `${project.name} · Prototype`, description: `Try the ${project.name} prototype (mock data).` } : {};
+  return project ? pageMeta(`${project.name} · Prototype`, `Try the ${project.name} prototype (mock data).`) : {};
 }
 
 export default async function PrototypePage({ params }) {
   const { slug } = await params;
-  const project = getProject(slug);
-  if (!project) notFound();
-  if (slug === "build-replay") return <BuildReplayPrototype />;
-  if (slug === "daftari") return <DaftariPrototype />;
-  if (slug === "xerote") return <XerotePrototype />;
-  if (slug === "poster-unlocker") return <PosterUnlockerPrototype />;
-  if (slug === "hardware-lab") return <HardwareLabPrototype />;
-  return (
-    <PrototypeFrame title={project.name}>
-      <EmptyState icon={<Hammer className="size-7" />} title="Prototype coming in the next task">
-        The {project.name} prototype is not built yet. You can read the proposal in the meantime.
-      </EmptyState>
-    </PrototypeFrame>
-  );
+  if (!getProject(slug)) notFound();
+  return <PrototypeLoader slug={slug} />;
 }

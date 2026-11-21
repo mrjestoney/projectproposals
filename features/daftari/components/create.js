@@ -79,7 +79,7 @@ export function Create({ cr, setCr, items, facts, onSaveGolden }) {
                   onClick={() => set({ step: n })}
                   aria-current={current ? "step" : undefined}
                   className={`flex min-h-11 items-center gap-tight rounded-full border px-base text-sm font-medium whitespace-nowrap ${
-                    current ? "border-transparent bg-primary text-white" : done ? "border-line bg-tint text-ink" : "border-line bg-field text-ink-soft"
+                    current ? "border-transparent bg-primary text-on-primary" : done ? "border-line bg-tint text-ink" : "border-line bg-field text-ink-soft"
                   }`}
                 >
                   <span className="flex size-5 items-center justify-center rounded-full bg-field text-xs font-semibold text-ink tabular-nums">
@@ -220,7 +220,7 @@ export function Create({ cr, setCr, items, facts, onSaveGolden }) {
                     aria-pressed={active}
                     onClick={() => set({ instructions: toggleChip(cr.instructions, chip) })}
                     className={`flex min-h-11 items-center gap-hair rounded-full border px-base text-sm font-medium ${
-                      active ? "border-transparent bg-primary text-white" : "border-line bg-field text-ink hover:border-line-hover"
+                      active ? "border-transparent bg-primary text-on-primary" : "border-line bg-field text-ink hover:border-line-hover"
                     }`}
                   >
                     {active ? <Check className="size-4" aria-hidden="true" /> : null}

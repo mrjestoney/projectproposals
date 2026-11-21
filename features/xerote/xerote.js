@@ -161,10 +161,10 @@ export function Xerote() {
                   aria-current={active ? "step" : undefined}
                   onClick={() => setStep(s.id)}
                   className={`flex min-h-14 w-full flex-col items-center justify-center gap-hair rounded-field border px-hair text-xs font-medium transition-colors sm:text-sm lg:min-h-11 lg:flex-row lg:justify-start lg:gap-tight lg:px-base lg:text-base ${
-                    active ? "border-transparent bg-primary text-white" : "border-line bg-field text-ink hover:border-line-hover disabled:text-hint disabled:hover:border-line"
+                    active ? "border-transparent bg-primary text-on-primary" : "border-line bg-field text-ink hover:border-line-hover disabled:text-hint disabled:hover:border-line"
                   }`}
                 >
-                  <span className={`flex size-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums ${active ? "bg-white/20" : "bg-tint"}`}>
+                  <span className={`flex size-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums ${active ? "bg-on-primary/20" : "bg-tint"}`}>
                     {done ? <Check className="size-3.5" aria-hidden="true" /> : enabled(s.id) ? i + 1 : <Lock className="size-3" aria-hidden="true" />}
                   </span>
                   {s.label}

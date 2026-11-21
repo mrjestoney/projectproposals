@@ -40,7 +40,7 @@ export function Walkthrough({ step, depth, sel, onGo, onPick, onPickNode, onOpen
                   aria-label={`Step ${x.n}: ${x.title}${done ? " (done)" : ""}`}
                   className={`press flex min-h-11 items-center gap-hair rounded-full border px-base text-sm font-medium whitespace-nowrap transition-colors ${
                     current
-                      ? "border-transparent bg-primary text-white"
+                      ? "border-transparent bg-primary text-on-primary"
                       : done
                         ? "border-line bg-tint text-ink hover:border-line-hover"
                         : "border-line bg-field text-ink-soft hover:border-line-hover"
