@@ -2,7 +2,7 @@ import { AlertTriangle, History, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { STEPS, edgeById, NODES } from "../data";
-import { ChipButton } from "./chip-button";
+import { ChipButton } from "@/components/ui/chip-button";
 import { DiffBlock, MapBlock, Terminal } from "./code-block";
 
 function Block({ title, children, className = "" }) {

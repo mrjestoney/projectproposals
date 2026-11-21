@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EDGES, NODES, edgeById, stepTitle } from "../data";
-import { ChipButton, TextButton } from "./chip-button";
+import { ChipButton, TextButton } from "@/components/ui/chip-button";
 import { Snippet } from "./code-block";
 
 function Row({ label, children }) {

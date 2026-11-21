@@ -24,6 +24,11 @@
   --highlight: #fff1a8;
   --code-bg: #e8e8e0;
 
+  /* Same in both themes: printed paper and a camera viewfinder. */
+  --paper: #ffffff;
+  --paper-ink: #1a1a1c;
+  --camera: #0c1210;
+
   --accent-build-replay: #0e6a72;
   --accent-poster-unlocker: #8a3a8f;
   --accent-daftari: #a35a00;
@@ -120,6 +125,9 @@
   --color-highlight: var(--highlight);
   --color-tint: var(--tint);
   --color-code: var(--code-bg);
+  --color-paper: var(--paper);
+  --color-paper-ink: var(--paper-ink);
+  --color-camera: var(--camera);
   --color-accent: var(--accent);
   --color-accent-tint: var(--accent-tint);
 
@@ -382,6 +390,21 @@ dialog::backdrop {
 .prose-doc img {
   max-width: 100%;
   height: auto;
+}
+
+/* Printing: only the element marked .print-area (and what contains it) is printed. */
+@media print {
+  body *:not(.print-area):not(:has(.print-area)):not(.print-area *) {
+    display: none !important;
+  }
+  .print-area .no-print {
+    display: none !important;
+  }
+  .print-area {
+    max-width: none !important;
+    border: 0 !important;
+    margin: 0 !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { FILES, NODES, stepTitle } from "../data";
-import { ChipButton, TextButton } from "./chip-button";
+import { ChipButton, TextButton } from "@/components/ui/chip-button";
 import { FullCode } from "./code-block";
 
 /** Every file with its purpose, the step that created it and the steps that changed it. */

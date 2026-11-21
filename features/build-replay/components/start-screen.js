@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Check, FolderGit2, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { FolderGit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
-import { Progress } from "@/components/ui/progress";
+import { StagedProgress } from "@/components/staged-progress";
 import { FILES, REPO_URL, STEPS } from "../data";
 
 const STAGES = [
@@ -58,49 +58,9 @@ export function IntroCard({ onReconstruct, onSkipIntro }) {
   );
 }
 
-/** The simulated reconstruction. Skippable; with reduced motion it runs through instantly. */
+/** The simulated reconstruction (shared StagedProgress). */
 export function Working({ onDone }) {
-  const [i, setI] = useState(0);
-
-  useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const t = setTimeout(() => (i >= STAGES.length ? onDone() : setI(i + 1)), reduce ? 0 : 650);
-    return () => clearTimeout(t);
-  }, [i, onDone]);
-
-  return (
-    <Card as="section" aria-labelledby="working-title" className="mx-auto max-w-xl p-group md:p-section">
-      <h2 id="working-title" className="text-2xl font-semibold tracking-tight">
-        Reconstructing…
-      </h2>
-      <Progress value={i} max={STAGES.length} label="Reconstruction progress" className="mt-base" />
-      <ol className="mt-group grid grid-cols-[minmax(0,1fr)] gap-tight" aria-live="polite">
-        {STAGES.map((s, n) => {
-          const done = n < i;
-          const current = n === i;
-          return (
-            <li key={s} className={`flex items-center gap-tight ${done || current ? "text-ink" : "text-hint"}`}>
-              <span className="flex size-6 shrink-0 items-center justify-center">
-                {done ? (
-                  <Check className="size-5 text-success" aria-hidden="true" />
-                ) : current ? (
-                  <Loader2 className="size-5 animate-spin text-accent" aria-hidden="true" />
-                ) : (
-                  <span className="size-2 rounded-full bg-line-hover" aria-hidden="true" />
-                )}
-              </span>
-              {s}
-            </li>
-          );
-        })}
-      </ol>
-      <div className="mt-group">
-        <button type="button" onClick={onDone} className="min-h-11 text-sm font-medium text-accent underline underline-offset-4">
-          Skip
-        </button>
-      </div>
-    </Card>
-  );
+  return <StagedProgress title="Reconstructing…" stages={STAGES} onDone={onDone} titleId="working-title" />;
 }
 
 /** The project summary shown when reconstruction finishes. */

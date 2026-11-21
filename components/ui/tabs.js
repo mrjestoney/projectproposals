@@ -25,7 +25,7 @@ export function Tabs({ tabs, value, onChange, label, className = "" }) {
 
   return (
     <div className={className}>
-      <div role="tablist" aria-label={label} onKeyDown={onKeyDown} className="flex overflow-x-auto border-b border-line">
+      <div role="tablist" aria-label={label} onKeyDown={onKeyDown} className="flex overflow-x-auto overflow-y-hidden border-b border-line">
         {tabs.map((t) => {
           const active = t.id === value;
           return (

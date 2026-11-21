@@ -9,7 +9,7 @@ import { useId } from "react";
 export function SegmentedControl({ options, value, onChange, label, className = "" }) {
   const name = useId();
   return (
-    <div role="radiogroup" aria-label={label} className={`inline-flex max-w-full overflow-x-auto rounded-full border border-line bg-field p-hair ${className}`}>
+    <div role="radiogroup" aria-label={label} className={`inline-flex max-w-full overflow-x-auto overflow-y-hidden rounded-full border border-line bg-field p-hair ${className}`}>
       {options.map((o) => (
         <label
           key={o.value}
